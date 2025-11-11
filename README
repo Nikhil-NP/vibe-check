@@ -1,0 +1,13 @@
+vibe-check/
+├── backend/          # Python FastAPI server
+│   ├── main.py      # Core API logic
+│   ├── requirements.txt
+│   └── README.md
+└── frontend/         # React TypeScript app
+    ├── src/
+    │   ├── App.tsx   # Main UI component
+    │   ├── index.css # Tailwind imports
+    │   └── main.tsx  # Entry point
+    ├── package.json
+    ├── tailwind.config.js
+    └── postcss.config.js

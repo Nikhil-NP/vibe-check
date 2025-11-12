@@ -12,6 +12,26 @@ interface SentimentResult {
   vibe: string
   emoji: string
   color: string
+  models: {
+    vader: { compound: number; positive: number; neutral: number; negative: number }
+    textblob: { polarity: number; subjectivity: number; positive: number; neutral: number; negative: number }
+  }
+  emotions: {
+    joy: number
+    anger: number
+    sadness: number
+    fear: number
+    surprise: number
+  }
+  dominant_emotion: string
+  insights: string[]
+  text_stats: {
+    word_count: number
+    character_count: number
+    sentence_count: number
+    avg_word_length: number
+    formality: number
+  }
 }
 
 function App() {
@@ -50,6 +70,22 @@ function App() {
       console.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const pct = (v: number) => `${(v * 100).toFixed(1)}%`
+
+  const modelAgreementLabel = (r: SentimentResult) => {
+    try {
+      const v = r.models.vader.compound
+      const t = r.models.textblob.polarity
+      const sign = (x: number) => (x > 0.1 ? 1 : x < -0.1 ? -1 : 0)
+      const vs = sign(v)
+      const ts = sign(t)
+      if (vs === ts) return { label: 'Models agree', color: 'text-green-600' }
+      return { label: 'Models disagree', color: 'text-yellow-600' }
+    } catch {
+      return { label: 'Model info', color: 'text-gray-600' }
     }
   }
 
@@ -179,6 +215,77 @@ function App() {
                     className="h-full bg-red-500 transition-all duration-500"
                     style={{ width: `${result.scores.negative * 100}%` }}
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Model Comparison */}
+            <div className="mt-6">
+              <h3 className="font-semibold text-gray-700 mb-3">Model Comparison</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 border rounded">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-semibold">VADER</span>
+                    <span className="text-sm text-gray-600">compound: {result.models.vader.compound}</span>
+                  </div>
+                  <div className="text-sm text-gray-600 mb-2">Pos/Neu/Neg: {pct(result.models.vader.positive)} / {pct(result.models.vader.neutral)} / {pct(result.models.vader.negative)}</div>
+                </div>
+                <div className="p-4 border rounded">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-semibold">TextBlob</span>
+                    <span className="text-sm text-gray-600">polarity: {result.models.textblob.polarity}</span>
+                  </div>
+                  <div className="text-sm text-gray-600 mb-2">Polarity/Subjectivity: {result.models.textblob.polarity} / {result.models.textblob.subjectivity}</div>
+                </div>
+              </div>
+              <div className="mt-3 text-sm">
+                <span className={modelAgreementLabel(result).color + ' font-semibold'}>{modelAgreementLabel(result).label}</span>
+              </div>
+            </div>
+
+            {/* Emotions */}
+            <div className="mt-6">
+              <h3 className="font-semibold text-gray-700 mb-3">Emotion Breakdown</h3>
+              <div className="space-y-2">
+                {([
+                  ['Joy', result.emotions.joy, 'text-yellow-500'],
+                  ['Anger', result.emotions.anger, 'text-red-500'],
+                  ['Sadness', result.emotions.sadness, 'text-blue-500'],
+                  ['Fear', result.emotions.fear, 'text-purple-500'],
+                  ['Surprise', result.emotions.surprise, 'text-green-500']
+                ] as [string, number, string][]).map(([name, val, color]) => (
+                  <div key={name}>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className={color}>{name}</span>
+                      <span className="font-semibold">{(val * 100).toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
+                      <div className={`h-full ${color.replace('text-', 'bg-')}`} style={{ width: `${val * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 text-sm text-gray-600">Dominant emotion: <span className="font-semibold">{result.dominant_emotion}</span></div>
+            </div>
+
+            {/* Insights & Text Stats */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 border rounded">
+                <h4 className="font-semibold mb-2">Insights</h4>
+                <ul className="list-disc list-inside text-sm text-gray-700">
+                  {result.insights.map((ins, i) => (
+                    <li key={i}>{ins}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="p-4 border rounded">
+                <h4 className="font-semibold mb-2">Text Stats</h4>
+                <div className="text-sm text-gray-700 space-y-1">
+                  <div>Words: <span className="font-semibold">{result.text_stats.word_count}</span></div>
+                  <div>Chars: <span className="font-semibold">{result.text_stats.character_count}</span></div>
+                  <div>Sentences: <span className="font-semibold">{result.text_stats.sentence_count}</span></div>
+                  <div>Avg word length: <span className="font-semibold">{result.text_stats.avg_word_length}</span></div>
+                  <div>Formality: <span className="font-semibold">{(result.text_stats.formality * 100).toFixed(0)}%</span></div>
                 </div>
               </div>
             </div>

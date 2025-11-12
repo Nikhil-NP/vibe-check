@@ -6,4 +6,4 @@ textblob==0.17.1
 pydantic==2.5.0
 python-dotenv==1.0.0
 text2emotion==0.0.5
-requests==2.34.0
+requests==2.32.4

@@ -9,3 +9,5 @@ ENV/
 .venv
 .env
 *.log
+CHANGES.md
+test_improvements.py

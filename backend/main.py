@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from textblob import TextBlob
-import text2emotion as te
 from typing import Dict, List, Any, Optional
 import re
 import uvicorn
@@ -174,60 +173,35 @@ def get_emotion_emoji(emotion: str) -> str:
 
 def detect_emotions_robust(text: str) -> tuple[Dict[str, float], str]:
     """
-    Robust emotion detection with fallback mechanisms.
+    Rule-based emotion detection without external dependencies.
     Returns (emotions_dict, dominant_emotion)
     """
-    # Try text2emotion first
-    try:
-        if len(text.strip()) >= 3:  # text2emotion needs minimum text
-            emotions_dict = te.get_emotion(text)
-            
-            # Validate the results
-            if emotions_dict and isinstance(emotions_dict, dict):
-                # Check if all values are not zero
-                if sum(emotions_dict.values()) > 0:
-                    # Get dominant emotion
-                    dominant_emotion = max(emotions_dict.items(), key=lambda x: x[1])[0]
-                    
-                    # Convert to proper format and ensure values are floats
-                    result = {
-                        "Happy": float(emotions_dict.get("Happy", 0)),
-                        "Angry": float(emotions_dict.get("Angry", 0)),
-                        "Sad": float(emotions_dict.get("Sad", 0)),
-                        "Fear": float(emotions_dict.get("Fear", 0)),
-                        "Surprise": float(emotions_dict.get("Surprise", 0))
-                    }
-                    return result, dominant_emotion
-    except Exception as e:
-        print(f"text2emotion error: {str(e)}")
-    
-    # Fallback: Rule-based emotion detection
     text_lower = text.lower()
     
     # Happy indicators
     happy_words = ['happy', 'joy', 'great', 'excellent', 'wonderful', 'amazing', 
                    'love', 'good', 'best', 'awesome', 'fantastic', 'thrilled', 'excited',
-                   '😊', '😀', '🎉', '❤️']
+                   'delighted', 'pleased', 'glad', 'perfect', 'brilliant', '😊', '😀', '🎉', '❤️']
     happy_score = sum(1 for word in happy_words if word in text_lower)
     
     # Angry indicators
     angry_words = ['angry', 'hate', 'terrible', 'awful', 'worst', 'disgusting',
-                   'furious', 'mad', 'rage', '😠', '😡', '🤬']
+                   'furious', 'mad', 'rage', 'annoyed', 'frustrated', 'irritated', '😠', '😡', '🤬']
     angry_score = sum(1 for word in angry_words if word in text_lower)
     
     # Sad indicators
     sad_words = ['sad', 'depressed', 'unhappy', 'miserable', 'disappointed',
-                 'sorry', 'unfortunate', 'bad', '😢', '😭', '💔']
+                 'sorry', 'unfortunate', 'bad', 'upset', 'down', 'heartbroken', '😢', '😭', '💔']
     sad_score = sum(1 for word in sad_words if word in text_lower)
     
     # Fear indicators
     fear_words = ['fear', 'scared', 'afraid', 'worried', 'anxious', 'nervous',
-                  'terrified', 'panic', '😨', '😰']
+                  'terrified', 'panic', 'concern', 'frightened', '😨', '😰']
     fear_score = sum(1 for word in fear_words if word in text_lower)
     
     # Surprise indicators
     surprise_words = ['surprise', 'shocked', 'amazed', 'unexpected', 'wow',
-                      'omg', 'unbelievable', '😮', '😲']
+                      'omg', 'unbelievable', 'incredible', 'astonishing', '😮', '😲']
     surprise_score = sum(1 for word in surprise_words if word in text_lower)
     
     # Normalize scores

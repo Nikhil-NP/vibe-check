@@ -177,15 +177,6 @@ def detect_emotions_robust(text: str) -> tuple[Dict[str, float], str]:
     Robust emotion detection with fallback mechanisms.
     Returns (emotions_dict, dominant_emotion)
     """
-    # Initialize default emotions
-    default_emotions = {
-        "Happy": 0.0,
-        "Angry": 0.0,
-        "Sad": 0.0,
-        "Fear": 0.0,
-        "Surprise": 0.0
-    }
-    
     # Try text2emotion first
     try:
         if len(text.strip()) >= 3:  # text2emotion needs minimum text
@@ -197,7 +188,16 @@ def detect_emotions_robust(text: str) -> tuple[Dict[str, float], str]:
                 if sum(emotions_dict.values()) > 0:
                     # Get dominant emotion
                     dominant_emotion = max(emotions_dict.items(), key=lambda x: x[1])[0]
-                    return emotions_dict, dominant_emotion
+                    
+                    # Convert to proper format and ensure values are floats
+                    result = {
+                        "Happy": float(emotions_dict.get("Happy", 0)),
+                        "Angry": float(emotions_dict.get("Angry", 0)),
+                        "Sad": float(emotions_dict.get("Sad", 0)),
+                        "Fear": float(emotions_dict.get("Fear", 0)),
+                        "Surprise": float(emotions_dict.get("Surprise", 0))
+                    }
+                    return result, dominant_emotion
     except Exception as e:
         print(f"text2emotion error: {str(e)}")
     
@@ -206,7 +206,8 @@ def detect_emotions_robust(text: str) -> tuple[Dict[str, float], str]:
     
     # Happy indicators
     happy_words = ['happy', 'joy', 'great', 'excellent', 'wonderful', 'amazing', 
-                   'love', 'good', 'best', 'awesome', 'fantastic', '😊', '😀', '🎉', '❤️']
+                   'love', 'good', 'best', 'awesome', 'fantastic', 'thrilled', 'excited',
+                   '😊', '😀', '🎉', '❤️']
     happy_score = sum(1 for word in happy_words if word in text_lower)
     
     # Angry indicators

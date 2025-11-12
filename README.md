@@ -224,4 +224,3 @@ MIT License - feel free to use this project for learning or commercial purposes.
 
 ---
 
-Made with ❤️ for understanding human sentiment

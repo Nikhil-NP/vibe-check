@@ -1,5 +1,40 @@
+# Virtual environments
 venv/
-FRONTEND_UPDATES.md
-INTEGRATION_SUMMARY.md
-test_integration.sh
-VISUAL_GUIDE.md
+.venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files
+test_*.py
+*_test.py
+
+# Logs
+*.log
+logs/
+
+# Build files
+build/
+dist/
+*.egg-info/

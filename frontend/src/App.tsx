@@ -1,5 +1,8 @@
 import { useState } from 'react'
 
+// Get API URL from environment variable, fallback to localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 interface SentimentResult {
   sentiment: string
   confidence: number
@@ -57,7 +60,7 @@ function App() {
     setEnhance(null)
 
     try {
-      const res = await fetch('http://localhost:8000/analyze', {
+      const res = await fetch(`${API_URL}/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
@@ -79,7 +82,7 @@ function App() {
 
     setEnhancing(true)
     try {
-      const res = await fetch('http://localhost:8000/enhance', {
+      const res = await fetch(`${API_URL}/enhance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, sentiment_data: result }),

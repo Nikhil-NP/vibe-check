@@ -38,3 +38,6 @@ logs/
 build/
 dist/
 *.egg-info/
+
+
+DEPLOY_SIMPLE.md

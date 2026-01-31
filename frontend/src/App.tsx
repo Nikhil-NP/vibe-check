@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 // Get API URL from environment variable, fallback to localhost
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = import.meta.env.VITE_API_URL 
 
 interface SentimentResult {
   sentiment: string

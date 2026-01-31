@@ -11,6 +11,8 @@ import requests
 from math import copysign
 import json
 from dotenv import load_dotenv
+from google import genai
+from google.genai import types
 
 # Load environment variables
 load_dotenv()
@@ -18,11 +20,17 @@ load_dotenv()
 app = FastAPI(title="Vibe Check API", version="1.0.0")
 
 # CORS setup for frontend
+# Get allowed origins from environment variable, default to localhost for development
+env_origins = os.getenv("ALLOWED_ORIGINS", "")
+ALLOWED_ORIGINS = [origin for origin in env_origins.split(",") if origin]
+if not ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS = ["http://localhost:5173", "http://localhost:3000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET","POST"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -365,42 +373,37 @@ class EnhanceResponse(BaseModel):
     key_takeaway: str
 
 
-def call_gemini_api(prompt: str) -> Optional[str]:
-    """Call Google Gemini API using GEMINI_API_KEY env var."""
-    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("geminiapi")
+def call_gemini_api(prompt: str, system_instruction: str = "") -> Optional[str]:
+    """Call Google Gemini API using google-genai SDK."""
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         print("No Gemini API key found")
         return None
     
-    # Use v1beta API with gemini-2.0-flash model
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
-    headers = {
-        "Content-Type": "application/json",
-        "X-goog-api-key": api_key
-    }
-    body = {
-        "contents": [{
-            "parts": [{"text": prompt}]
-        }],
-        "generationConfig": {
-            "temperature": 0.7,
-            "maxOutputTokens": 800,
-        }
-    }
-    
     try:
-        resp = requests.post(url, headers=headers, json=body, timeout=30)
-        if resp.status_code != 200:
-            print(f"Gemini API error: {resp.status_code} - {resp.text[:200]}")
-            return None
-        data = resp.json()
-        candidates = data.get("candidates", [])
-        if candidates:
-            content = candidates[0].get("content", {})
-            parts = content.get("parts", [])
-            if parts:
-                return parts[0].get("text", "")
-        return None
+        # Initialize the client with API key
+        client = genai.Client(api_key=api_key)
+        
+        # Build config
+        config = types.GenerateContentConfig(
+            temperature=0.7,
+            max_output_tokens=2048,
+            response_mime_type="application/json",
+        )
+        
+        # Add system instruction if provided
+        if system_instruction:
+            config.system_instruction = system_instruction
+        
+        # Call the API
+        response = client.models.generate_content(
+            model="gemini-3-flash-preview",
+            config=config,
+            contents=prompt
+        )
+        
+        return response.text if response.text else None
+        
     except Exception as e:
         print(f"Gemini API exception: {str(e)}")
         return None
@@ -411,10 +414,12 @@ def get_gemini_vibe_check(text: str) -> Optional[Dict[str, Any]]:
     Get AI-powered vibe check from Gemini.
     Returns sentiment analysis with reasoning and creative insights.
     """
-    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("geminiapi")
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         print("No Gemini API key configured")
         return None
+    
+    system_instruction = """You are a sentiment analysis expert. Analyze text and return ONLY valid JSON with no markdown formatting or additional text."""
     
     prompt = f"""Analyze the sentiment and vibe of this text. Return ONLY valid JSON with this exact structure:
 
@@ -435,7 +440,7 @@ Text to analyze:
 
 Return only the JSON object, no markdown formatting or additional text."""
 
-    response = call_gemini_api(prompt)
+    response = call_gemini_api(prompt, system_instruction)
     if not response:
         print("No response from Gemini API")
         return None
@@ -512,6 +517,8 @@ def enhance_with_ai(payload: EnhanceInput):
     if payload.sentiment_data:
         sentiment_info = f"\n\nCurrent sentiment analysis: {payload.sentiment_data.get('sentiment', 'neutral')} (confidence: {payload.sentiment_data.get('confidence', 0)})"
     
+    system_instruction = """You are a writing improvement expert. Provide actionable feedback and return ONLY valid JSON with no markdown formatting."""
+    
     prompt = f"""Analyze this text and provide actionable writing improvements. Return ONLY valid JSON with these keys:
 
 {{
@@ -529,7 +536,7 @@ Text:{sentiment_info}
 
 Return only the JSON, no markdown formatting."""
 
-    response = call_gemini_api(prompt)
+    response = call_gemini_api(prompt, system_instruction)
     if not response:
         raise HTTPException(status_code=502, detail="Gemini API request failed")
 

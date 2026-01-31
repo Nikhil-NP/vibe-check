@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import ColdStartNotice from './components/ColdStartNotice'
 
 // Get API URL from environment variable, fallback to localhost
-const API_URL = import.meta.env.VITE_API_URL 
+const API_URL = import.meta.env.VITE_API_URL
 
 interface SentimentResult {
   sentiment: string
@@ -102,10 +103,12 @@ function App() {
 
   const pct = (v: number) => `${(v * 100).toFixed(1)}%`
 
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-100 via-purple-50 to-fuchsia-100 py-10 px-4">
+      <ColdStartNotice />
       <div className="max-w-6xl mx-auto">
-        
+
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-7xl font-black bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent mb-3">
@@ -124,7 +127,7 @@ function App() {
             placeholder="Enter or paste your text here..."
             className="w-full h-40 p-5 border-2 border-purple-200 rounded-2xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition resize-none bg-white/80"
           />
-          
+
           <div className="mt-5 flex justify-between items-center">
             <span className="text-sm text-gray-600 font-medium">{text.length} characters</span>
             <button
@@ -142,7 +145,7 @@ function App() {
         {/* Results */}
         {result && (
           <div className="space-y-6 animate-fade-in">
-            
+
             {/* Main Sentiment Card */}
             <div className="backdrop-blur-lg bg-white/60 rounded-3xl shadow-2xl p-8 border border-white">
               <div className="flex items-start justify-between mb-6">
@@ -234,9 +237,9 @@ function App() {
                         <span className="text-sm text-gray-600">Confidence:</span>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-purple-500 to-pink-500" 
-                              style={{ width: pct(result.confidence) }} 
+                            <div
+                              className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                              style={{ width: pct(result.confidence) }}
                             />
                           </div>
                           <span className="text-sm font-bold">{pct(result.confidence)}</span>
@@ -268,9 +271,9 @@ function App() {
                         <span className="text-sm text-indigo-100">Confidence:</span>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-3 bg-white/30 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-white" 
-                              style={{ width: pct(result.gemini_analysis.confidence) }} 
+                            <div
+                              className="h-full bg-white"
+                              style={{ width: pct(result.gemini_analysis.confidence) }}
                             />
                           </div>
                           <span className="text-sm font-bold">{pct(result.gemini_analysis.confidence)}</span>
@@ -317,9 +320,9 @@ function App() {
                         <span className="text-sm text-gray-600 mb-1 block">Mood Score:</span>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-indigo-400 to-purple-500" 
-                              style={{ width: pct(result.gemini_analysis.mood_score) }} 
+                            <div
+                              className="h-full bg-gradient-to-r from-indigo-400 to-purple-500"
+                              style={{ width: pct(result.gemini_analysis.mood_score) }}
                             />
                           </div>
                           <span className="text-xs font-bold text-gray-700">{pct(result.gemini_analysis.mood_score)}</span>
@@ -336,8 +339,8 @@ function App() {
                     </h5>
                     <div className="flex flex-wrap gap-2">
                       {result.gemini_analysis.key_phrases.map((phrase, i) => (
-                        <span 
-                          key={i} 
+                        <span
+                          key={i}
                           className="px-3 py-1.5 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 text-indigo-700 rounded-lg text-sm font-medium"
                         >
                           "{phrase}"
@@ -359,7 +362,7 @@ function App() {
                 {/* Comparison Note */}
                 <div className="mt-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
                   <p className="text-sm text-gray-700">
-                    <span className="font-bold">💡 Note:</span> Traditional models use statistical patterns, 
+                    <span className="font-bold">💡 Note:</span> Traditional models use statistical patterns,
                     while Gemini AI understands context and nuance. Compare both for comprehensive insights!
                   </p>
                 </div>
@@ -374,12 +377,12 @@ function App() {
                   <div>
                     <h4 className="font-bold text-gray-800 mb-2">Want AI-Powered Insights?</h4>
                     <p className="text-sm text-gray-600 mb-3">
-                      Add your Gemini API key to get side-by-side AI sentiment analysis with reasoning, 
+                      Add your Gemini API key to get side-by-side AI sentiment analysis with reasoning,
                       emotional tone detection, and key phrase extraction.
                     </p>
-                    <a 
-                      href="https://makersuite.google.com/app/apikey" 
-                      target="_blank" 
+                    <a
+                      href="https://makersuite.google.com/app/apikey"
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="inline-block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-semibold transition"
                     >
@@ -403,7 +406,7 @@ function App() {
                   ))}
                 </ul>
               </div>
-              
+
               <div className="backdrop-blur-lg bg-white/60 rounded-3xl shadow-xl p-6 border border-white">
                 <h3 className="font-bold text-gray-800 mb-4">📊 Text Stats</h3>
                 <div className="space-y-2 text-sm">
@@ -519,7 +522,7 @@ function App() {
         <div className="text-center mt-16 text-gray-500 text-sm">
           <p className="font-semibold">© Nikhil P {new Date().getFullYear()} </p>
           <a href="https://github.com/Nikhil-NP/vibe-check" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline font-semibold mt-2 inline-block">
-            GitHub 
+            GitHub
           </a>
         </div>
       </div>

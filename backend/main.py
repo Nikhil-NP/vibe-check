@@ -21,15 +21,11 @@ app = FastAPI(title="Vibe Check API", version="1.0.0")
 
 # CORS setup for frontend
 # Get allowed origins from environment variable, default to localhost for development
-env_origins = os.getenv("ALLOWED_ORIGINS", "")
-# Split by comma and strip whitespace from each origin
-ALLOWED_ORIGINS = [origin.strip() for origin in env_origins.split(",") if origin.strip()]
+# FORCE WILDCARD for debugging - ignores env vars to ensure connection works
+ALLOWED_ORIGINS = ["*"]
+# env_origins = os.getenv("ALLOWED_ORIGINS", "")
+# ALLOWED_ORIGINS = [origin.strip() for origin in env_origins.split(",") if origin.strip()]
 
-# Verify origins in logs (optional, for debug)
-print(f"Server starting with ALLOWED_ORIGINS: {ALLOWED_ORIGINS}")
-
-if not ALLOWED_ORIGINS:
-    ALLOWED_ORIGINS = ["*"]  # Default to allow all for easier deployment debugging
 
 app.add_middleware(
     CORSMiddleware,

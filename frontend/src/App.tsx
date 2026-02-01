@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import ColdStartNotice from './components/ColdStartNotice'
 
 // Get API URL from environment variable, fallback to localhost
-const API_URL = import.meta.env.VITE_API_URL
+// Remove trailing slash if present to avoid double slashes
+const RAW_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = RAW_API_URL.replace(/\/$/, '')
 
 interface SentimentResult {
   sentiment: string
@@ -46,10 +48,12 @@ function App() {
 
   // Debug API URL
   useEffect(() => {
-    console.log("🔌 Connected to Backend API:", API_URL || "undefined (using relative path)")
-    if (API_URL?.includes("localhost")) {
-      console.warn("⚠️ Using LOCALHOST in production? Make sure to set VITE_API_URL in your Vercel settings!")
-    }
+    console.log("🔌 Connected to Backend API:", API_URL)
+    // Basic health check ping
+    fetch(`${API_URL}/health`)
+      .then(res => res.json())
+      .then(data => console.log("✅ Backend Health Check:", data))
+      .catch(err => console.error("❌ Backend Health Check Failed:", err))
   }, [])
 
   const [result, setResult] = useState<SentimentResult | null>(null)
@@ -70,18 +74,27 @@ function App() {
     setEnhance(null)
 
     try {
+      console.log(`Sending request to: ${API_URL}/analyze`)
       const res = await fetch(`${API_URL}/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       })
 
-      if (!res.ok) throw new Error('Analysis failed')
+      if (!res.ok) {
+        const errorText = await res.text()
+        throw new Error(`Server Error ${res.status}: ${errorText || res.statusText}`)
+      }
+
       const data = await res.json()
       setResult(data)
-    } catch (err) {
-      setError('Failed to analyze. Is the backend running?')
-      console.error(err)
+    } catch (err: any) {
+      console.error("Fetch Error:", err)
+      if (err.message && err.message.includes('Failed to fetch')) {
+        setError(`Connection Error: Could not reach backend at ${API_URL}. Check logic/CORS.`)
+      } else {
+        setError(err.message || 'Analysis failed')
+      }
     } finally {
       setLoading(false)
     }

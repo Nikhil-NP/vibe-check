@@ -165,7 +165,16 @@ function App() {
             </button>
           </div>
 
-          {error && <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">{error}</div>}
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
+              <p className="font-bold">Error:</p>
+              <p>{error}</p>
+              <div className="mt-2 text-xs text-red-500 font-mono bg-red-100 p-2 rounded">
+                Debug Info: Trying to connect to <br />
+                <strong>{API_URL || 'undefined'}</strong>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Results */}

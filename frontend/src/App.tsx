@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ColdStartNotice from './components/ColdStartNotice'
 
 // Get API URL from environment variable, fallback to localhost
@@ -43,6 +43,15 @@ interface EnhanceResult {
 
 function App() {
   const [text, setText] = useState('')
+
+  // Debug API URL
+  useEffect(() => {
+    console.log("🔌 Connected to Backend API:", API_URL || "undefined (using relative path)")
+    if (API_URL?.includes("localhost")) {
+      console.warn("⚠️ Using LOCALHOST in production? Make sure to set VITE_API_URL in your Vercel settings!")
+    }
+  }, [])
+
   const [result, setResult] = useState<SentimentResult | null>(null)
   const [enhance, setEnhance] = useState<EnhanceResult | null>(null)
   const [loading, setLoading] = useState(false)

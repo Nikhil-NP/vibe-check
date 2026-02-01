@@ -53,7 +53,11 @@ function App() {
     fetch(`${API_URL}/health`)
       .then(res => res.json())
       .then(data => console.log("✅ Backend Health Check:", data))
-      .catch(err => console.error("❌ Backend Health Check Failed:", err))
+      .catch(err => {
+        console.error("❌ Backend Health Check Failed:", err)
+        console.warn("⚠️ If this fails in PROD, check your Vercel Environment Variables!")
+        console.warn("👉 VITE_API_URL must be set to https://your-backend.onrender.com (no slash)")
+      })
   }, [])
 
   const [result, setResult] = useState<SentimentResult | null>(null)

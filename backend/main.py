@@ -29,7 +29,7 @@ ALLOWED_ORIGINS = [origin.strip() for origin in env_origins.split(",") if origin
 print(f"Server starting with ALLOWED_ORIGINS: {ALLOWED_ORIGINS}")
 
 if not ALLOWED_ORIGINS:
-    ALLOWED_ORIGINS = ["http://localhost:5173", "http://localhost:3000"]
+    ALLOWED_ORIGINS = ["*"]  # Default to allow all for easier deployment debugging
 
 app.add_middleware(
     CORSMiddleware,
